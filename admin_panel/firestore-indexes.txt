@@ -1,0 +1,23 @@
+// Firestore Indexes (if needed)
+// Add these in Firebase Console > Firestore > Indexes
+
+// For notifications collection queries:
+// Collection: notifications
+// Fields: status (Ascending), timestamp (Descending)
+// Fields: type (Ascending), priority (Ascending), timestamp (Descending)
+// Fields: recipients (Ascending), status (Ascending), timestamp (Descending)
+
+// For users collection queries:
+// Collection: users
+// Fields: userType (Ascending), lastActive (Descending)
+// Fields: isPremium (Ascending), createdAt (Descending)
+
+// For properties collection queries:
+// Collection: properties
+// Fields: status (Ascending), price (Ascending)
+// Fields: type (Ascending), location (Ascending), status (Ascending)
+
+// For projects collection queries:
+// Collection: projects
+// Fields: status (Ascending), launchDate (Descending)
+// Fields: type (Ascending), status (Ascending), createdAt (Descending)

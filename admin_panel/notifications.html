@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Admin Panel</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --info-color: #17a2b8;
+            --light-bg: #f8f9fa;
+            --dark-bg: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #34495e 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-weight: 600;
+            color: white;
+        }
+
+        .sidebar-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin: 0.2rem 0;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            border-left-color: var(--secondary-color);
+        }
+
+        .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.15);
+            border-left-color: var(--secondary-color);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 0;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .content-area {
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        /* Notification Cards */
+        .notification-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .notification-card.unread {
+            border-left-color: var(--warning-color);
+            background: rgba(243, 156, 18, 0.05);
+        }
+
+        .notification-card.important {
+            border-left-color: var(--accent-color);
+            background: rgba(231, 76, 60, 0.05);
+        }
+
+        .notification-card.success {
+            border-left-color: var(--success-color);
+            background: rgba(39, 174, 96, 0.05);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .notification-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .notification-time {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .notification-content {
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .notification-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .notification-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-unread {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .badge-important {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .badge-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .badge-info {
+            background: var(--info-color);
+            color: white;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h5 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+        }
+
+        .stats-card .icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .stats-card .icon.primary { background: linear-gradient(135deg, var(--primary-color), #34495e); }
+        .stats-card .icon.success { background: linear-gradient(135deg, var(--success-color), #2ecc71); }
+        .stats-card .icon.warning { background: linear-gradient(135deg, var(--warning-color), #f1c40f); }
+        .stats-card .icon.info { background: linear-gradient(135deg, var(--info-color), #3498db); }
+
+        .stats-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .stats-card p {
+            color: #6c757d;
+            margin: 0.5rem 0 0 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .top-bar {
+                padding: 1rem;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-building me-2"></i>Admin Panel</h3>
+                <p>Luxury Real Estate</p>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="index.html" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="notifications.html" class="nav-link active">
+                        <i class="fas fa-bell"></i>
+                        Notifications
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="projects.html" class="nav-link">
+                        <i class="fas fa-building"></i>
+                        Upcoming Projects
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="properties.html" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        Property Management
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="arts_antiques.html" class="nav-link">
+                        <i class="fas fa-palette"></i>
+                        Arts & Antiques
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="analytics.html" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        Analytics
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="users.html" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        Users
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="index.html#settings" class="nav-link">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary d-md-none me-3" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0">Notifications</h4>
+                </div>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-primary" onclick="sendNotification()">
+                        <i class="fas fa-plus me-2"></i>Send Notification
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h1>Notifications</h1>
+                    <p>Manage and send notifications to users</p>
+                </div>
+
+                <!-- Notification Stats -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="stats-card">
+                            <div class="icon primary">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h3 id="totalNotifications">0</h3>
+                            <p>Total Notifications</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="stats-card">
+                            <div class="icon warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h3 id="unreadNotifications">0</h3>
+                            <p>Unread</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="stats-card">
+                            <div class="icon success">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <h3 id="sentToday">0</h3>
+                            <p>Sent Today</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="stats-card">
+                            <div class="icon info">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 id="openRate">0%</h3>
+                            <p>Open Rate</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <h5><i class="fas fa-filter me-2"></i>Filter Notifications</h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="unread">Unread</option>
+                                <option value="read">Read</option>
+                                <option value="important">Important</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <select class="form-select" id="typeFilter">
+                                <option value="">All Types</option>
+                                <option value="property">Property</option>
+                                <option value="project">Project</option>
+                                <option value="user">User</option>
+                                <option value="system">System</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <input type="date" class="form-control" id="dateFilter" placeholder="Filter by date">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                                <i class="fas fa-refresh me-1"></i>Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications List -->
+                <div id="notificationsList">
+                    <!-- Notifications will be loaded here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-bell fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No notifications found</h4>
+                    <p class="text-muted">Try adjusting your filters or send a new notification</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Notification Modal -->
+    <div class="modal fade" id="sendNotificationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="notificationForm">
+                        <div class="mb-3">
+                            <label for="notificationTitle" class="form-label">Title *</label>
+                            <input type="text" class="form-control" id="notificationTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationMessage" class="form-label">Message *</label>
+                            <textarea class="form-control" id="notificationMessage" rows="4" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationType" class="form-label">Type *</label>
+                                <select class="form-select" id="notificationType" required>
+                                    <option value="">Select Type</option>
+                                    <option value="property">Property</option>
+                                    <option value="project">Project</option>
+                                    <option value="user">User</option>
+                                    <option value="system">System</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationPriority" class="form-label">Priority</label>
+                                <select class="form-select" id="notificationPriority">
+                                    <option value="normal">Normal</option>
+                                    <option value="important">Important</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationRecipients" class="form-label">Recipients</label>
+                                <select class="form-select" id="notificationRecipients">
+                                    <option value="all">All Users</option>
+                                    <option value="property_owners">Property Owners</option>
+                                    <option value="project_investors">Project Investors</option>
+                                    <option value="premium_users">Premium Users</option>
+                                    <option value="new_users">New Users (Last 30 days)</option>
+                                    <option value="inactive_users">Inactive Users</option>
+                                    <option value="admin">Admin Only</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationSchedule" class="form-label">Schedule</label>
+                                <select class="form-select" id="notificationSchedule">
+                                    <option value="now">Send Now</option>
+                                    <option value="schedule">Schedule for Later</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="scheduleOptions" class="mb-3" style="display: none;">
+                            <label for="scheduledTime" class="form-label">Scheduled Time</label>
+                            <input type="datetime-local" class="form-control" id="scheduledTime">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationImage" class="form-label">Image (Optional)</label>
+                                <input type="file" class="form-control" id="notificationImage" accept="image/*" onchange="previewNotificationImage(this)">
+                                <div class="form-text">Add an image to make the notification more engaging (Max 5MB)</div>
+                                <div id="imagePreviewContainer" class="mt-2" style="display: none;">
+                                    <img id="imagePreviewImg" class="img-thumbnail" style="max-height: 150px;">
+                                    <button type="button" class="btn btn-sm btn-danger ms-2" onclick="clearNotificationImage()">
+                                        <i class="fas fa-times"></i> Remove
+                                    </button>
+                                </div>
+                                <div id="uploadProgress" class="mt-2" style="display: none;">
+                                    <div class="progress">
+                                        <div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <small class="text-muted">Uploading image...</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationAction" class="form-label">Action Button</label>
+                                <select class="form-select" id="notificationAction">
+                                    <option value="">No Action</option>
+                                    <option value="view_properties">View Properties</option>
+                                    <option value="view_projects">View Projects</option>
+                                    <option value="contact_us">Contact Us</option>
+                                    <option value="download_app">Download App</option>
+                                    <option value="custom">Custom Action</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="customActionDiv" class="mb-3" style="display: none;">
+                            <label for="customActionText" class="form-label">Custom Action Text</label>
+                            <input type="text" class="form-control" id="customActionText" placeholder="e.g., Book Now, Learn More">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationExpiry" class="form-label">Expiry (Optional)</label>
+                                <input type="datetime-local" class="form-control" id="notificationExpiry">
+                                <div class="form-text">When should this notification expire?</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="notificationFrequency" class="form-label">Frequency</label>
+                                <select class="form-select" id="notificationFrequency">
+                                    <option value="once">Send Once</option>
+                                    <option value="daily">Daily (for 7 days)</option>
+                                    <option value="weekly">Weekly (for 4 weeks)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notificationTags" class="form-label">Tags (Optional)</label>
+                            <input type="text" class="form-control" id="notificationTags" placeholder="e.g., promotion, update, reminder">
+                            <div class="form-text">Comma-separated tags for categorization</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sendEmail" checked>
+                                <label class="form-check-label" for="sendEmail">
+                                    Also send as email
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sendSMS">
+                                <label class="form-check-label" for="sendSMS">
+                                    Also send as SMS (Premium feature)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="requireConfirmation">
+                                <label class="form-check-label" for="requireConfirmation">
+                                    Require user confirmation before sending
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-info" onclick="previewNotification()">
+                        <i class="fas fa-eye me-2"></i>Preview
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sendNotificationSubmit()">
+                        <i class="fas fa-paper-plane me-2"></i>Send Notification
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBqNmTAt3P53K8Eda32mPOwc8iBcxIaM0",
+            authDomain: "antella-estates.firebaseapp.com",
+            projectId: "antella-estates",
+            storageBucket: "antella-estates.firebasestorage.app",
+            messagingSenderId: "683844877826",
+            appId: "1:683844877826:web:50562580498159173eb11b"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const functions = firebase.functions();
+        
+        // Configure Firebase Storage with proper settings
+        const storage = firebase.storage();
+        storage.app.options.storageBucket = firebaseConfig.storageBucket;
+
+        // Global variables
+        let notifications = [];
+        let filteredNotifications = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Notifications page loaded');
+            initializeAdminAuth();
+            setupEventListeners();
+            loadNotifications();
+            loadNotificationStats();
+            loadNotificationTemplates();
+        });
+
+        // Initialize admin authentication
+        async function initializeAdminAuth() {
+            try {
+                console.log('Initializing admin authentication...');
+                await firebase.auth().signInAnonymously();
+                console.log('Admin authentication successful');
+                
+                // Test Firebase Functions connection
+                await testFirebaseFunctions();
+                
+            } catch (error) {
+                console.error('Admin authentication failed:', error);
+                showAlert('Authentication failed. Some features may not work properly.', 'warning');
+            }
+        }
+
+        // Test Firebase Functions connection
+        async function testFirebaseFunctions() {
+            try {
+                console.log('Testing Firebase Functions...');
+                const sendNotification = functions.httpsCallable('sendNotification');
+                console.log('✅ Firebase Functions available');
+            } catch (error) {
+                console.error('❌ Firebase Functions not available:', error);
+                showAlert('Firebase Functions not available. Notifications may not work properly.', 'warning');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Sidebar toggle for mobile
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    document.querySelector('.sidebar').classList.toggle('show');
+                });
+            }
+
+            // Filter listeners
+            document.getElementById('statusFilter').addEventListener('change', filterNotifications);
+            document.getElementById('typeFilter').addEventListener('change', filterNotifications);
+            document.getElementById('dateFilter').addEventListener('change', filterNotifications);
+            
+            // Notification form listeners
+            document.getElementById('notificationSchedule').addEventListener('change', handleScheduleChange);
+            document.getElementById('notificationAction').addEventListener('change', handleActionChange);
+        }
+
+        // Handle schedule change
+        function handleScheduleChange() {
+            const schedule = document.getElementById('notificationSchedule').value;
+            const scheduleOptions = document.getElementById('scheduleOptions');
+            
+            if (schedule === 'schedule') {
+                scheduleOptions.style.display = 'block';
+                // Set default time to 1 hour from now
+                const now = new Date();
+                now.setHours(now.getHours() + 1);
+                document.getElementById('scheduledTime').value = now.toISOString().slice(0, 16);
+            } else {
+                scheduleOptions.style.display = 'none';
+            }
+        }
+
+        // Handle action change
+        function handleActionChange() {
+            const action = document.getElementById('notificationAction').value;
+            const customActionDiv = document.getElementById('customActionDiv');
+            
+            if (action === 'custom') {
+                customActionDiv.style.display = 'block';
+            } else {
+                customActionDiv.style.display = 'none';
+            }
+        }
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                console.log('Loading notifications...');
+                
+                const notificationsSnapshot = await db.collection('notifications')
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                notifications = [];
+                notificationsSnapshot.forEach(doc => {
+                    notifications.push({
+                        id: doc.id,
+                        ...doc.data(),
+                        timestamp: doc.data().timestamp?.toDate ? doc.data().timestamp.toDate() : new Date()
+                    });
+                });
+                
+                console.log(`Loaded ${notifications.length} notifications`);
+                updateNotificationsDisplay();
+                
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                notifications = [];
+                
+                // Show sample data for demonstration
+                notifications = [
+                    {
+                        id: 'sample1',
+                        title: 'New Property Added',
+                        message: 'A new luxury property has been added to the system and is pending review.',
+                        type: 'property',
+                        priority: 'normal',
+                        status: 'unread',
+                        timestamp: new Date(),
+                        recipients: 'all'
+                    },
+                    {
+                        id: 'sample2',
+                        title: 'Project Update',
+                        message: 'Luxury Villa Project has been updated with new amenities and pricing.',
+                        type: 'project',
+                        priority: 'important',
+                        status: 'read',
+                        timestamp: new Date(Date.now() - 3600000),
+                        recipients: 'project_investors'
+                    },
+                    {
+                        id: 'sample3',
+                        title: 'System Maintenance',
+                        message: 'Scheduled maintenance will occur tonight from 2 AM to 4 AM.',
+                        type: 'system',
+                        priority: 'urgent',
+                        status: 'unread',
+                        timestamp: new Date(Date.now() - 7200000),
+                        recipients: 'all'
+                    }
+                ];
+                
+                updateNotificationsDisplay();
+                showAlert('Loaded sample notifications for demonstration.', 'info');
+            }
+        }
+
+        // Update notifications display
+        function updateNotificationsDisplay() {
+            filteredNotifications = [...notifications];
+            renderNotifications();
+        }
+
+        // Render notifications
+        function renderNotifications() {
+            const container = document.getElementById('notificationsList');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (filteredNotifications.length === 0) {
+                if (container) container.innerHTML = '';
+                if (emptyState) emptyState.style.display = 'block';
+                return;
+            }
+            
+            if (emptyState) emptyState.style.display = 'none';
+            
+            if (container) {
+                container.innerHTML = filteredNotifications.map(notification => `
+                    <div class="notification-card ${notification.status} ${notification.priority}">
+                        <div class="notification-header">
+                            <div>
+                                <h5 class="notification-title">${notification.title}</h5>
+                                <div class="notification-time">
+                                    ${formatTime(notification.timestamp)}
+                                </div>
+                            </div>
+                            <div>
+                                <span class="notification-badge badge-${notification.priority}">${notification.priority}</span>
+                                ${notification.status === 'unread' ? '<span class="notification-badge badge-unread">Unread</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="notification-content">
+                            ${notification.message}
+                        </div>
+                        <div class="notification-actions">
+                            <button class="btn btn-outline-primary btn-sm" onclick="viewNotification('${notification.id}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            ${notification.status === 'unread' ? `
+                            <button class="btn btn-outline-success btn-sm" onclick="markAsRead('${notification.id}')">
+                                <i class="fas fa-check"></i> Mark Read
+                            </button>
+                            ` : ''}
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteNotification('${notification.id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Filter notifications
+        function filterNotifications() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            
+            filteredNotifications = notifications.filter(notification => {
+                const matchesStatus = !statusFilter || notification.status === statusFilter;
+                const matchesType = !typeFilter || notification.type === typeFilter;
+                const matchesDate = !dateFilter || 
+                    notification.timestamp.toDateString() === new Date(dateFilter).toDateString();
+                
+                return matchesStatus && matchesType && matchesDate;
+            });
+            
+            renderNotifications();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            filterNotifications();
+        }
+
+        // Load notification statistics
+        async function loadNotificationStats() {
+            try {
+                console.log('Loading notification stats...');
+                
+                const totalNotifications = notifications.length;
+                const unreadNotifications = notifications.filter(n => n.status === 'unread').length;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const sentToday = notifications.filter(n => n.timestamp >= today).length;
+                const openRate = notifications.length > 0 ? 
+                    Math.round((notifications.filter(n => n.status === 'read').length / notifications.length) * 100) : 0;
+                
+                document.getElementById('totalNotifications').textContent = totalNotifications;
+                document.getElementById('unreadNotifications').textContent = unreadNotifications;
+                document.getElementById('sentToday').textContent = sentToday;
+                document.getElementById('openRate').textContent = openRate + '%';
+                
+            } catch (error) {
+                console.error('Error loading notification stats:', error);
+            }
+        }
+
+        // Send notification
+        function sendNotification() {
+            const modal = new bootstrap.Modal(document.getElementById('sendNotificationModal'));
+            modal.show();
+        }
+
+        // Send notification submit
+        async function sendNotificationSubmit() {
+            const title = document.getElementById('notificationTitle').value;
+            const message = document.getElementById('notificationMessage').value;
+            const type = document.getElementById('notificationType').value;
+            const priority = document.getElementById('notificationPriority').value;
+            const recipients = document.getElementById('notificationRecipients').value;
+            const schedule = document.getElementById('notificationSchedule').value;
+            const scheduledTime = document.getElementById('scheduledTime').value;
+            const image = document.getElementById('notificationImage').files[0];
+            const action = document.getElementById('notificationAction').value;
+            const customActionText = document.getElementById('customActionText').value;
+            const expiry = document.getElementById('notificationExpiry').value;
+            const frequency = document.getElementById('notificationFrequency').value;
+            const tags = document.getElementById('notificationTags').value;
+            const sendEmail = document.getElementById('sendEmail').checked;
+            const sendSMS = document.getElementById('sendSMS').checked;
+            const requireConfirmation = document.getElementById('requireConfirmation').checked;
+            
+            if (!title || !message || !type) {
+                showAlert('Please fill in all required fields', 'danger');
+                return;
+            }
+            
+            // Validate scheduled time
+            if (schedule === 'schedule' && !scheduledTime) {
+                showAlert('Please select a scheduled time', 'danger');
+                return;
+            }
+            
+            // Validate custom action
+            if (action === 'custom' && !customActionText) {
+                showAlert('Please enter custom action text', 'danger');
+                return;
+            }
+
+            // Show confirmation dialog if required
+            if (requireConfirmation) {
+                await showConfirmationDialog({
+                    title, message, type, priority, recipients, 
+                    sendEmail, sendSMS, schedule, scheduledTime
+                });
+                return;
+            }
+
+            // Proceed with sending
+            await executeSendNotification({
+                title, message, type, priority, recipients, schedule, scheduledTime, 
+                image, action, customActionText, expiry, frequency, tags, 
+                sendEmail, sendSMS, requireConfirmation
+            });
+        }
+
+        // Show confirmation dialog
+        async function showConfirmationDialog(data) {
+            // Get user count for recipients
+            let recipientCount = 0;
+            try {
+                if (data.recipients === 'all') {
+                    const usersSnapshot = await db.collection('users').get();
+                    recipientCount = usersSnapshot.size;
+                } else if (data.recipients === 'topic') {
+                    recipientCount = 'Topic subscribers';
+                } else {
+                    recipientCount = '1 user';
+                }
+            } catch (e) {
+                recipientCount = 'Unknown';
+            }
+
+            const emailText = data.sendEmail ? '<li><i class="fas fa-check text-success me-2"></i>Email notification</li>' : '';
+            const smsText = data.sendSMS ? '<li><i class="fas fa-check text-success me-2"></i>SMS notification (Premium)</li>' : '';
+            const scheduleText = data.schedule === 'schedule' ? 
+                `<p><strong>Scheduled for:</strong> ${new Date(data.scheduledTime).toLocaleString()}</p>` : 
+                '<p><strong>Delivery:</strong> Immediate</p>';
+
+            const confirmHTML = `
+                <div class="modal fade" id="confirmationModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Confirm Notification Send
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Please review the notification details before sending.
+                                </div>
+
+                                <div class="notification-summary">
+                                    <h6><strong>Title:</strong></h6>
+                                    <p class="ps-3">${data.title}</p>
+
+                                    <h6><strong>Message:</strong></h6>
+                                    <p class="ps-3">${data.message}</p>
+
+                                    <hr>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Type:</strong> <span class="badge bg-info">${data.type}</span></p>
+                                            <p><strong>Priority:</strong> <span class="badge bg-${data.priority === 'urgent' ? 'danger' : data.priority === 'important' ? 'warning' : 'primary'}">${data.priority}</span></p>
+                                            <p><strong>Recipients:</strong> ${data.recipients} ${typeof recipientCount === 'number' ? '(' + recipientCount + ' users)' : '(' + recipientCount + ')'}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            ${scheduleText}
+                                            <p><strong>Delivery channels:</strong></p>
+                                            <ul>
+                                                <li><i class="fas fa-check text-success me-2"></i>Push notification</li>
+                                                ${emailText}
+                                                ${smsText}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    <strong>Note:</strong> ${data.sendSMS ? 'SMS notifications will use premium credits. ' : ''}
+                                    This action cannot be undone once sent.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="confirmAndSend()">
+                                    <i class="fas fa-paper-plane me-2"></i>Yes, Send Notification
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Remove existing confirmation modal
+            const existing = document.getElementById('confirmationModal');
+            if (existing) existing.remove();
+
+            // Add to body
+            document.body.insertAdjacentHTML('beforeend', confirmHTML);
+
+            // Show modal
+            const confirmModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            confirmModal.show();
+
+            // Clean up
+            document.getElementById('confirmationModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
+        // Confirm and send
+        async function confirmAndSend() {
+            // Close confirmation modal
+            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+            confirmModal.hide();
+
+            // Get all form data again and execute send
+            const title = document.getElementById('notificationTitle').value;
+            const message = document.getElementById('notificationMessage').value;
+            const type = document.getElementById('notificationType').value;
+            const priority = document.getElementById('notificationPriority').value;
+            const recipients = document.getElementById('notificationRecipients').value;
+            const schedule = document.getElementById('notificationSchedule').value;
+            const scheduledTime = document.getElementById('scheduledTime').value;
+            const image = document.getElementById('notificationImage').files[0];
+            const action = document.getElementById('notificationAction').value;
+            const customActionText = document.getElementById('customActionText').value;
+            const expiry = document.getElementById('notificationExpiry').value;
+            const frequency = document.getElementById('notificationFrequency').value;
+            const tags = document.getElementById('notificationTags').value;
+            const sendEmail = document.getElementById('sendEmail').checked;
+            const sendSMS = document.getElementById('sendSMS').checked;
+            const requireConfirmation = document.getElementById('requireConfirmation').checked;
+
+            await executeSendNotification({
+                title, message, type, priority, recipients, schedule, scheduledTime, 
+                image, action, customActionText, expiry, frequency, tags, 
+                sendEmail, sendSMS, requireConfirmation
+            });
+        }
+
+        // Execute send notification
+        async function executeSendNotification(formData) {
+            const {
+                title, message, type, priority, recipients, schedule, scheduledTime,
+                image, action, customActionText, expiry, frequency, tags,
+                sendEmail, sendSMS, requireConfirmation
+            } = formData;
+            
+            try {
+                // Show loading state
+                const sendBtn = document.querySelector('#sendNotificationModal button.btn-primary');
+                const originalText = sendBtn.innerHTML;
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+                // Prepare notification data with all features
+                const notificationData = {
+                    title: title,
+                    body: message,
+                    type: type,
+                    target: recipients,
+                    priority: priority,
+                    schedule: schedule,
+                    scheduledTime: schedule === 'schedule' ? new Date(scheduledTime) : null,
+                    action: action,
+                    actionText: action === 'custom' ? customActionText : null,
+                    expiry: expiry ? new Date(expiry) : null,
+                    frequency: frequency,
+                    tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+                    sendEmail: sendEmail,
+                    sendSMS: sendSMS,
+                    requireConfirmation: requireConfirmation,
+                    image: null // Will be handled separately if image is provided
+                };
+                
+                // Handle image upload if provided
+                if (image) {
+                    console.log('Uploading notification image...');
+                    // Show upload progress
+                    const uploadProgressDiv = document.getElementById('uploadProgress');
+                    if (uploadProgressDiv) uploadProgressDiv.style.display = 'block';
+                    
+                    try {
+                        const imageUrl = await uploadNotificationImage(image);
+                        notificationData.image = imageUrl;
+                        console.log('✅ Image uploaded and attached to notification');
+                        
+                        // Hide upload progress
+                        if (uploadProgressDiv) uploadProgressDiv.style.display = 'none';
+                    } catch (uploadError) {
+                        console.warn('Image upload failed, continuing without image:', uploadError);
+                        showAlert('Image upload failed: ' + uploadError.message + '. Sending notification without image.', 'warning');
+                        
+                        // Hide upload progress
+                        if (uploadProgressDiv) uploadProgressDiv.style.display = 'none';
+                        
+                        // Continue without image
+                    }
+                }
+                
+                // Update field name for Firebase Function compatibility
+                if (notificationData.image) {
+                    notificationData.imageUrl = notificationData.image;
+                    delete notificationData.image;
+                }
+                
+                console.log('Sending notification with data:', notificationData);
+                
+                // Use Firebase Functions to send notification
+                const sendNotification = functions.httpsCallable('sendNotification');
+                const result = await sendNotification(notificationData);
+                
+                console.log('Notification sent via Firebase Functions:', result.data);
+                
+                // Show success message with details
+                let successMessage = 'Notification sent successfully!';
+                if (schedule === 'schedule') {
+                    successMessage += ` Scheduled for ${new Date(scheduledTime).toLocaleString()}`;
+                }
+                if (sendEmail) successMessage += ' (Email sent)';
+                if (sendSMS) successMessage += ' (SMS sent)';
+                
+                showAlert(successMessage, 'success');
+                
+                // Also save to Firestore for admin panel display
+                // Remove undefined fields to prevent Firestore errors
+                const firestoreData = {
+                    title: notificationData.title,
+                    body: notificationData.body,
+                    type: notificationData.type,
+                    target: notificationData.target,
+                    priority: notificationData.priority,
+                    schedule: notificationData.schedule,
+                    action: notificationData.action || null,
+                    frequency: notificationData.frequency,
+                    sendEmail: notificationData.sendEmail || false,
+                    sendSMS: notificationData.sendSMS || false,
+                    requireConfirmation: notificationData.requireConfirmation || false,
+                    status: schedule === 'schedule' ? 'scheduled' : 'sent',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdBy: 'admin',
+                    notificationId: result.data.notificationId || null
+                };
+                
+                // Only add optional fields if they have values
+                if (notificationData.imageUrl) firestoreData.imageUrl = notificationData.imageUrl;
+                if (notificationData.actionText) firestoreData.actionText = notificationData.actionText;
+                if (notificationData.scheduledTime) firestoreData.scheduledTime = notificationData.scheduledTime;
+                if (notificationData.expiry) firestoreData.expiry = notificationData.expiry;
+                if (notificationData.tags && notificationData.tags.length > 0) firestoreData.tags = notificationData.tags;
+                
+                await db.collection('notifications').add(firestoreData);
+                
+                // Reset form and close modal
+                document.getElementById('notificationForm').reset();
+                document.getElementById('scheduleOptions').style.display = 'none';
+                document.getElementById('customActionDiv').style.display = 'none';
+                bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal')).hide();
+                
+                // Reload notifications
+                await loadNotifications();
+                await loadNotificationStats();
+                
+                // Reset button state
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = originalText;
+                }
+                
+            } catch (error) {
+                console.error('Error sending notification:', error);
+                showAlert('Failed to send notification: ' + error.message, 'danger');
+                
+                // Reset button state on error
+                const sendBtn = document.querySelector('#sendNotificationModal button.btn-primary');
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Notification';
+                }
+            } finally {
+                // Ensure button is always re-enabled
+                const sendBtn = document.querySelector('#sendNotificationModal button.btn-primary');
+                if (sendBtn && sendBtn.disabled) {
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Notification';
+                }
+            }
+        }
+
+        // Preview notification image
+        function previewNotificationImage(input) {
+            const preview = document.getElementById('imagePreviewImg');
+            const container = document.getElementById('imagePreviewContainer');
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Validate file size
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('Image file is too large. Maximum size is 5MB', 'danger');
+                    input.value = '';
+                    container.style.display = 'none';
+                    return;
+                }
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showAlert('Please select an image file', 'danger');
+                    input.value = '';
+                    container.style.display = 'none';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    container.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+                
+                console.log('Image selected:', file.name, 'Size:', (file.size / 1024).toFixed(2) + 'KB');
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Clear notification image
+        function clearNotificationImage() {
+            document.getElementById('notificationImage').value = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
+            document.getElementById('imagePreviewImg').src = '';
+        }
+
+        // Upload notification image
+        async function uploadNotificationImage(file) {
+            try {
+                console.log('=== Starting Image Upload ===');
+                console.log('File name:', file.name);
+                console.log('File size:', (file.size / 1024).toFixed(2) + 'KB');
+                console.log('File type:', file.type);
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    throw new Error('Please select an image file');
+                }
+                
+                // Validate file size (5MB limit for notifications)
+                if (file.size > 5 * 1024 * 1024) {
+                    throw new Error('Image file is too large. Maximum size is 5MB');
+                }
+                
+                // Check Firebase Storage configuration
+                const storage = firebase.storage();
+                if (!storage) {
+                    throw new Error('Firebase Storage is not initialized');
+                }
+                
+                console.log('Firebase Storage bucket:', storage.app.options.storageBucket);
+                
+                const fileName = `notifications/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                console.log('Upload path:', fileName);
+                
+                const storageRef = storage.ref().child(fileName);
+                
+                // Add metadata
+                const metadata = {
+                    contentType: file.type,
+                    cacheControl: 'public, max-age=31536000',
+                    customMetadata: {
+                        uploadedBy: 'admin',
+                        uploadedAt: new Date().toISOString(),
+                        originalName: file.name
+                    }
+                };
+                
+                console.log('Starting upload with metadata:', metadata);
+                
+                // Use put method with await
+                const uploadTask = storageRef.put(file, metadata);
+                
+                // Track upload progress
+                let uploadProgress = 0;
+                const progressBar = document.getElementById('uploadProgressBar');
+                
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        uploadProgress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log('Upload progress:', uploadProgress.toFixed(2) + '%');
+                        
+                        // Update progress bar if element exists
+                        if (progressBar) {
+                            progressBar.style.width = uploadProgress.toFixed(0) + '%';
+                            progressBar.setAttribute('aria-valuenow', uploadProgress.toFixed(0));
+                            progressBar.textContent = uploadProgress.toFixed(0) + '%';
+                        }
+                    },
+                    (error) => {
+                        console.error('Upload error during transfer:', error);
+                    }
+                );
+                
+                // Wait for upload to complete
+                const snapshot = await uploadTask;
+                console.log('Upload completed successfully');
+                console.log('Snapshot state:', snapshot.state);
+                console.log('Bytes transferred:', snapshot.bytesTransferred);
+                
+                // Get download URL
+                console.log('Getting download URL...');
+                const downloadUrl = await snapshot.ref.getDownloadURL();
+                console.log('✅ Image uploaded successfully!');
+                console.log('Download URL:', downloadUrl);
+                
+                return downloadUrl;
+                
+            } catch (error) {
+                console.error('❌ Error uploading notification image:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                console.error('Full error:', JSON.stringify(error, null, 2));
+                
+                // Provide more specific error messages
+                if (error.code === 'storage/unauthorized') {
+                    throw new Error('Upload failed: Unauthorized. Please check Firebase Storage rules.');
+                } else if (error.code === 'storage/canceled') {
+                    throw new Error('Upload was canceled.');
+                } else if (error.code === 'storage/unknown') {
+                    throw new Error('Upload failed: Unknown error. Please check console for details.');
+                } else if (error.code === 'storage/unauthenticated') {
+                    throw new Error('Upload failed: Not authenticated. Please refresh the page and try again.');
+                } else if (error.code === 'storage/retry-limit-exceeded') {
+                    throw new Error('Upload failed: Network issues. Please check your connection and try again.');
+                } else if (error.message && error.message.includes('CORS')) {
+                    throw new Error('Upload failed: CORS error. Please check Firebase Storage configuration.');
+                } else if (error.message && error.message.includes('network')) {
+                    throw new Error('Upload failed: Network error. Please check your internet connection.');
+                } else {
+                    throw new Error('Failed to upload image: ' + (error.message || 'Unknown error'));
+                }
+            }
+        }
+
+        // View notification
+        function viewNotification(notificationId) {
+            const notification = notifications.find(n => n.id === notificationId);
+            if (!notification) return;
+            
+            alert(`Title: ${notification.title}\n\nMessage: ${notification.message}\n\nType: ${notification.type}\nPriority: ${notification.priority}\nRecipients: ${notification.recipients}`);
+        }
+
+        // Mark as read
+        async function markAsRead(notificationId) {
+            try {
+                await db.collection('notifications').doc(notificationId).update({
+                    status: 'read',
+                    readAt: new Date()
+                });
+                
+                showAlert('Notification marked as read', 'success');
+                await loadNotifications();
+                await loadNotificationStats();
+                
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+                showAlert('Failed to mark notification as read', 'danger');
+            }
+        }
+
+        // Delete notification
+        async function deleteNotification(notificationId) {
+            if (!confirm('Are you sure you want to delete this notification?')) {
+                return;
+            }
+            
+            try {
+                await db.collection('notifications').doc(notificationId).delete();
+                
+                showAlert('Notification deleted successfully!', 'success');
+                await loadNotifications();
+                await loadNotificationStats();
+                
+            } catch (error) {
+                console.error('Error deleting notification:', error);
+                showAlert('Failed to delete notification', 'danger');
+            }
+        }
+
+        // Format time
+        function formatTime(timestamp) {
+            const now = new Date();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return timestamp.toLocaleDateString();
+        }
+
+        // Preview notification
+        function previewNotification() {
+            const title = document.getElementById('notificationTitle').value;
+            const message = document.getElementById('notificationMessage').value;
+            const type = document.getElementById('notificationType').value;
+            const priority = document.getElementById('notificationPriority').value;
+            const action = document.getElementById('notificationAction').value;
+            const customActionText = document.getElementById('customActionText').value;
+            const image = document.getElementById('notificationImage').files[0];
+            
+            if (!title || !message) {
+                showAlert('Please enter title and message to preview', 'warning');
+                return;
+            }
+            
+            // Create preview modal
+            const previewHTML = `
+                <div class="modal fade" id="previewModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Notification Preview</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="notification-preview" style="border: 1px solid #ddd; border-radius: 10px; padding: 20px; background: #f8f9fa;">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h4 style="margin: 0; color: #2c3e50;">${title}</h4>
+                                            <small class="text-muted">${new Date().toLocaleString()}</small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-${priority === 'urgent' ? 'danger' : priority === 'important' ? 'warning' : 'primary'}">${priority}</span>
+                                            <span class="badge bg-secondary">${type}</span>
+                                        </div>
+                                    </div>
+                                    ${image ? '<div class="mb-3"><img src="' + URL.createObjectURL(image) + '" class="img-fluid rounded" style="max-height: 200px;"></div>' : ''}
+                                    <p style="margin: 0; color: #6c757d; line-height: 1.5;">${message}</p>
+                                    ${action && action !== '' ? `
+                                    <div class="mt-3">
+                                        <button class="btn btn-primary btn-sm">
+                                            ${action === 'custom' ? customActionText : action.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                        </button>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing preview modal if any
+            const existingPreview = document.getElementById('previewModal');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            // Add preview modal to body
+            document.body.insertAdjacentHTML('beforeend', previewHTML);
+            
+            // Show preview modal
+            const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+            previewModal.show();
+            
+            // Clean up when modal is hidden
+            document.getElementById('previewModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
+        // Load notification templates
+        function loadNotificationTemplates() {
+            const templates = [
+                {
+                    name: 'Property Update',
+                    title: 'New Property Available',
+                    message: 'Check out our latest property listing with amazing amenities!',
+                    type: 'property',
+                    priority: 'normal',
+                    action: 'view_properties'
+                },
+                {
+                    name: 'Project Launch',
+                    title: 'New Project Launch',
+                    message: 'Exciting new project is now available for investment!',
+                    type: 'project',
+                    priority: 'important',
+                    action: 'view_projects'
+                },
+                {
+                    name: 'Maintenance Alert',
+                    title: 'Scheduled Maintenance',
+                    message: 'System maintenance will occur tonight from 2 AM to 4 AM.',
+                    type: 'system',
+                    priority: 'urgent',
+                    action: ''
+                },
+                {
+                    name: 'Welcome Message',
+                    title: 'Welcome to Luxury Real Estate',
+                    message: 'Thank you for joining us! Explore our premium properties.',
+                    type: 'user',
+                    priority: 'normal',
+                    action: 'contact_us'
+                }
+            ];
+            
+            // Add template selector to form
+            const templateHTML = `
+                <div class="mb-3">
+                    <label for="notificationTemplate" class="form-label">Quick Templates</label>
+                    <select class="form-select" id="notificationTemplate" onchange="applyTemplate()">
+                        <option value="">Select a template</option>
+                        ${templates.map(template => `<option value='${JSON.stringify(template)}'>${template.name}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+            
+            // Insert template selector after the title field
+            const titleField = document.getElementById('notificationTitle').parentElement;
+            titleField.insertAdjacentHTML('afterend', templateHTML);
+        }
+
+        // Apply template
+        function applyTemplate() {
+            const templateSelect = document.getElementById('notificationTemplate');
+            if (!templateSelect.value) return;
+            
+            try {
+                const template = JSON.parse(templateSelect.value);
+                
+                document.getElementById('notificationTitle').value = template.title;
+                document.getElementById('notificationMessage').value = template.message;
+                document.getElementById('notificationType').value = template.type;
+                document.getElementById('notificationPriority').value = template.priority;
+                document.getElementById('notificationAction').value = template.action;
+                
+                // Trigger change events
+                document.getElementById('notificationAction').dispatchEvent(new Event('change'));
+                
+                showAlert('Template applied successfully!', 'success');
+            } catch (error) {
+                console.error('Error applying template:', error);
+                showAlert('Failed to apply template', 'danger');
+            }
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) return;
+            
+            const alertId = 'alert-' + Date.now();
+            
+            const alertHTML = `
+                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                const alert = document.getElementById(alertId);
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

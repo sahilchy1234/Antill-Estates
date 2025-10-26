@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for Admin Panel
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow read access to all files
+    match /{allPaths=**} {
+      allow read: if true;
+    }
+    
+    // Allow write access for admin uploads
+    match /properties/{fileName} {
+      allow write: if true; // Allow all writes for now - can be restricted later
+    }
+    
+    match /avatars/{fileName} {
+      allow write: if true; // Allow all writes for now - can be restricted later
+    }
+    
+    match /test/{allPaths=**} {
+      allow write: if true; // Allow test uploads
+    }
+    
+    // Allow write access for other admin files
+    match /admin/{allPaths=**} {
+      allow write: if true;
+    }
+    
+    // Default rule - allow all operations for development
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}
