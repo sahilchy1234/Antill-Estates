@@ -661,6 +661,7 @@ async function saveProject() {
         formData.imageUrl = imageUrl;
         formData.createdAt = currentEditingProject?.createdAt || new Date().toISOString();
         
+        let projectId = currentEditingProject?.id;
         if (currentEditingProject) {
             // Update existing project
             const updateUpcomingProject = functions.httpsCallable('updateUpcomingProject');
@@ -672,8 +673,22 @@ async function saveProject() {
         } else {
             // Add new project
             const addUpcomingProject = functions.httpsCallable('addUpcomingProject');
-            await addUpcomingProject(formData);
+            const result = await addUpcomingProject(formData);
+            projectId = result.data?.projectId;
             showAlert('Project added successfully!', 'success');
+            
+            // Create in-app notification for new project
+            await createInAppNotification({
+                title: `New Project: ${formData.title}`,
+                subtitle: `${formData.description || ''}`,
+                itemType: 'project',
+                itemId: projectId,
+                imageUrl: formData.imageUrl || '',
+                images: formData.imageUrl ? [formData.imageUrl] : [],
+                price: formData.price,
+                location: formData.address || '',
+                actionText: 'View Project',
+            });
         }
         
         // Refresh projects list
@@ -902,6 +917,48 @@ function showAlert(message, type) {
             alert.remove();
         }
     }, 5000);
+}
+
+// Create in-app notification
+async function createInAppNotification({
+    title,
+    subtitle,
+    itemType,
+    itemId,
+    imageUrl,
+    images = [],
+    price,
+    location,
+    actionText = 'View Details'
+}) {
+    try {
+        console.log('Creating in-app notification:', title);
+        
+        const notificationData = {
+            title: title,
+            subtitle: subtitle,
+            itemType: itemType,
+            itemId: itemId,
+            imageUrl: imageUrl,
+            images: images,
+            price: price,
+            location: location,
+            actionText: actionText,
+            active: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            data: {
+                itemType: itemType,
+                itemId: itemId
+            }
+        };
+        
+        await db.collection('in_app_notifications').add(notificationData);
+        console.log('✅ In-app notification created successfully');
+        
+    } catch (error) {
+        console.error('❌ Error creating in-app notification:', error);
+        // Don't throw - notification creation should not block main operation
+    }
 }
 
 // Test function for debugging file input

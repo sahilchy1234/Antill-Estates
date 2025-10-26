@@ -7,6 +7,16 @@ class NotificationModel {
   final Map<String, dynamic>? data;
   final String? type;
   final String? imageUrl;
+  
+  // Enhanced fields for in-app notification panel
+  final bool isViewed;  // Track if user has viewed the full notification
+  final String? itemId; // ID of the property/project/art item
+  final String? itemType; // 'property', 'project', 'arts_antiques'
+  final String? actionUrl; // Deep link or route to the item
+  final String? actionText; // Text for action button
+  final List<String>? images; // Multiple images for the notification
+  final String? price; // Price information
+  final String? location; // Location information
 
   NotificationModel({
     required this.id,
@@ -17,6 +27,14 @@ class NotificationModel {
     this.data,
     this.type,
     this.imageUrl,
+    this.isViewed = false,
+    this.itemId,
+    this.itemType,
+    this.actionUrl,
+    this.actionText,
+    this.images,
+    this.price,
+    this.location,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +47,14 @@ class NotificationModel {
       data: json['data'],
       type: json['type'],
       imageUrl: json['imageUrl'],
+      isViewed: json['isViewed'] ?? false,
+      itemId: json['itemId'],
+      itemType: json['itemType'],
+      actionUrl: json['actionUrl'],
+      actionText: json['actionText'],
+      images: json['images'] != null ? List<String>.from(json['images']) : null,
+      price: json['price'],
+      location: json['location'],
     );
   }
 
@@ -42,6 +68,14 @@ class NotificationModel {
       'data': data,
       'type': type,
       'imageUrl': imageUrl,
+      'isViewed': isViewed,
+      'itemId': itemId,
+      'itemType': itemType,
+      'actionUrl': actionUrl,
+      'actionText': actionText,
+      'images': images,
+      'price': price,
+      'location': location,
     };
   }
 
@@ -54,6 +88,14 @@ class NotificationModel {
     Map<String, dynamic>? data,
     String? type,
     String? imageUrl,
+    bool? isViewed,
+    String? itemId,
+    String? itemType,
+    String? actionUrl,
+    String? actionText,
+    List<String>? images,
+    String? price,
+    String? location,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -64,6 +106,14 @@ class NotificationModel {
       data: data ?? this.data,
       type: type ?? this.type,
       imageUrl: imageUrl ?? this.imageUrl,
+      isViewed: isViewed ?? this.isViewed,
+      itemId: itemId ?? this.itemId,
+      itemType: itemType ?? this.itemType,
+      actionUrl: actionUrl ?? this.actionUrl,
+      actionText: actionText ?? this.actionText,
+      images: images ?? this.images,
+      price: price ?? this.price,
+      location: location ?? this.location,
     );
   }
 

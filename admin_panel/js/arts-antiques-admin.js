@@ -422,6 +422,9 @@ async function saveItem() {
             status: document.getElementById('itemStatus').value,
             featured: document.getElementById('itemFeatured').checked,
             description: document.getElementById('itemDescription').value,
+            // New contact info fields
+            contactPhone: document.getElementById('itemContactPhone')?.value || '',
+            contactEmail: document.getElementById('itemContactEmail')?.value || '',
             views: 0,
             rating: 0,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -450,6 +453,7 @@ async function saveItem() {
         }
         
         // Save to Firestore
+        let itemId = editingItemId;
         if (editingItemId) {
             // Update existing item
             await db.collection('arts_antiques').doc(editingItemId).update(itemData);
@@ -457,8 +461,22 @@ async function saveItem() {
         } else {
             // Add new item
             itemData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-            await db.collection('arts_antiques').add(itemData);
+            const docRef = await db.collection('arts_antiques').add(itemData);
+            itemId = docRef.id;
             showAlert('Item added successfully!', 'success');
+            
+            // Create in-app notification for new arts & antiques item
+            await createInAppNotification({
+                title: `New ${itemData.category}: ${itemData.title}`,
+                subtitle: `${itemData.artist ? 'By ' + itemData.artist + '. ' : ''}${itemData.description.substring(0, 100)}...`,
+                itemType: 'arts_antiques',
+                itemId: itemId,
+                imageUrl: itemData.images[0] || '',
+                images: itemData.images || [],
+                price: `$${itemData.price.toLocaleString()}`,
+                location: itemData.location || '',
+                actionText: 'View Details',
+            });
         }
         
         // Reset and reload
@@ -524,6 +542,11 @@ function editItem(itemId) {
     document.getElementById('itemStatus').value = item.status;
     document.getElementById('itemFeatured').checked = item.featured || false;
     document.getElementById('itemDescription').value = item.description;
+    // Populate contact fields
+    const phoneEl = document.getElementById('itemContactPhone');
+    const emailEl = document.getElementById('itemContactEmail');
+    if (phoneEl) phoneEl.value = item.contactPhone || '';
+    if (emailEl) emailEl.value = item.contactEmail || '';
     
     // Show existing images
     const previewDiv = document.getElementById('imagePreview');
@@ -611,6 +634,16 @@ function viewItem(itemId) {
                     
                     <dt class="col-sm-4">Featured:</dt>
                     <dd class="col-sm-8">${item.featured ? '<i class="fas fa-check text-success"></i> Yes' : '<i class="fas fa-times text-danger"></i> No'}</dd>
+
+                    ${item.contactPhone ? `
+                    <dt class="col-sm-4">Phone:</dt>
+                    <dd class="col-sm-8"><a href="tel:${item.contactPhone}">${item.contactPhone}</a></dd>
+                    ` : ''}
+
+                    ${item.contactEmail ? `
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8"><a href="mailto:${item.contactEmail}">${item.contactEmail}</a></dd>
+                    ` : ''}
                 </dl>
             </div>
         </div>
@@ -683,6 +716,9 @@ function resetForm() {
     document.getElementById('imagePreview').innerHTML = '';
     document.getElementById('imagePreview').style.display = 'none';
     document.getElementById('itemModalLabel').textContent = 'Add New Item';
+    // Clear contact fields if present
+    document.getElementById('itemContactPhone') && (document.getElementById('itemContactPhone').value = '');
+    document.getElementById('itemContactEmail') && (document.getElementById('itemContactEmail').value = '');
     editingItemId = null;
     uploadedImages = [];
 }
@@ -813,6 +849,48 @@ function getSampleItems() {
 document.getElementById('itemModal')?.addEventListener('hidden.bs.modal', function () {
     resetForm();
 });
+
+// Create in-app notification
+async function createInAppNotification({
+    title,
+    subtitle,
+    itemType,
+    itemId,
+    imageUrl,
+    images = [],
+    price,
+    location,
+    actionText = 'View Details'
+}) {
+    try {
+        console.log('Creating in-app notification:', title);
+        
+        const notificationData = {
+            title: title,
+            subtitle: subtitle,
+            itemType: itemType,
+            itemId: itemId,
+            imageUrl: imageUrl,
+            images: images,
+            price: price,
+            location: location,
+            actionText: actionText,
+            active: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            data: {
+                itemType: itemType,
+                itemId: itemId
+            }
+        };
+        
+        await db.collection('in_app_notifications').add(notificationData);
+        console.log('✅ In-app notification created successfully');
+        
+    } catch (error) {
+        console.error('❌ Error creating in-app notification:', error);
+        // Don't throw - notification creation should not block main operation
+    }
+}
 
 // Export functions for global access
 window.artsAntiquesAdmin = {

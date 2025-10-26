@@ -6,6 +6,8 @@ import 'package:antill_estates/configs/app_style.dart';
 import 'package:antill_estates/controller/bottom_bar_controller.dart';
 import 'package:antill_estates/controller/saved_properties_controller.dart';
 import 'package:antill_estates/gen/assets.gen.dart';
+import 'package:antill_estates/utils/price_formatter.dart';
+import 'package:antill_estates/common/cached_firebase_image.dart';
 
 class SavedPropertiesView extends StatelessWidget {
   const SavedPropertiesView({super.key});
@@ -83,7 +85,7 @@ class SavedPropertiesView extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    savedPropertiesController.savedPropertyList[index],
+                    '${_stripCountLabel(savedPropertiesController.savedPropertyList[index])} (${index == 0 ? savedPropertiesController.savedProperties.length : savedPropertiesController.savedArtsAntiques.length})',
                     style: AppStyle.heading5Medium(
                       color: savedPropertiesController.selectSavedTab.value == index
                           ? AppColor.primaryColor
@@ -191,19 +193,21 @@ class SavedPropertiesView extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(AppSize.appSize12),
                   child: property.propertyPhotos.isNotEmpty
-                      ? Image.network(
-                          property.propertyPhotos.first,
+                      ? CachedFirebaseImage(
+                          imageUrl: property.propertyPhotos.first,
                           width: double.infinity,
                           height: 200,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              Assets.images.searchProperty1.path,
-                              width: double.infinity,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            );
-                          },
+                          cacheWidth: 800,
+                          cacheHeight: 400,
+                          borderRadius: BorderRadius.circular(AppSize.appSize12),
+                          showLoadingIndicator: true,
+                          errorWidget: Image.asset(
+                            Assets.images.searchProperty1.path,
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          ),
                         )
                       : Image.asset(
                           Assets.images.searchProperty1.path,
@@ -258,7 +262,7 @@ class SavedPropertiesView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '₹ ${property.expectedPrice}',
+                  _formatPriceDynamic(property.expectedPrice),
                   style: AppStyle.heading5Medium(color: AppColor.primaryColor),
                 ),
                 Row(
@@ -379,20 +383,24 @@ class SavedPropertiesView extends StatelessWidget {
                       top: Radius.circular(AppSize.appSize12),
                     ),
                     child: (itemData['images'] as List?)?.isNotEmpty == true
-                        ? Image.network(
-                            (itemData['images'] as List).first,
+                        ? CachedFirebaseImage(
+                            imageUrl: (itemData['images'] as List).first,
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: AppColor.borderColor,
-                                child: Icon(
-                                  Icons.image_not_supported,
-                                  color: AppColor.descriptionColor,
-                                ),
-                              );
-                            },
+                            cacheWidth: 400,
+                            cacheHeight: 400,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(AppSize.appSize12),
+                            ),
+                            showLoadingIndicator: true,
+                            errorWidget: Container(
+                              color: AppColor.borderColor,
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: AppColor.descriptionColor,
+                              ),
+                            ),
                           )
                         : Container(
                             color: AppColor.borderColor,
@@ -459,7 +467,7 @@ class SavedPropertiesView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '₹ ${itemData['price'] ?? 0}',
+                        _formatPriceDynamic(itemData['price']),
                         style: AppStyle.heading6Medium(color: AppColor.primaryColor),
                       ),
                       if (itemData['rating'] != null && itemData['rating'] > 0)
@@ -485,5 +493,23 @@ class SavedPropertiesView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Format dynamic price values (num or String) using Indian Rupee formatting
+  String _formatPriceDynamic(dynamic price) {
+    if (price == null) return '₹0';
+    if (price is num) {
+      return PriceFormatter.formatNumericPrice(price.toDouble());
+    }
+    if (price is String) {
+      return PriceFormatter.formatPrice(price);
+    }
+    return '₹0';
+  }
+
+  /// Remove any existing trailing count in parentheses from a label
+  String _stripCountLabel(String label) {
+    final regex = RegExp(r"\s*\(\d+\)\s*$");
+    return label.replaceAll(regex, "").trim();
   }
 }

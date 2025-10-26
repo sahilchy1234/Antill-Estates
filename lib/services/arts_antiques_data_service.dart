@@ -254,6 +254,28 @@ class ArtsAntiquesDataService {
     }
   }
 
+  /// Get items by artist name (basic filter from collection)
+  static Future<List<Map<String, dynamic>>> getItemsByArtist(String artistName) async {
+    try {
+      if (artistName.isEmpty) return [];
+      final querySnapshot = await _firestore
+          .collection('arts_antiques')
+          .where('status', isEqualTo: 'active')
+          .where('artist', isEqualTo: artistName)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('❌ Error getting items by artist: $e');
+      return [];
+    }
+  }
+
   /// Search arts & antiques items
   static Future<List<ArtsAntiquesItem>> searchItems(String searchTerm, {int limit = 20}) async {
     try {

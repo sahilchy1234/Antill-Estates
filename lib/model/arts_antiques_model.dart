@@ -18,6 +18,8 @@ class ArtsAntiquesItem {
   final double rating;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? contactPhone;
+  final String? contactEmail;
 
   ArtsAntiquesItem({
     this.id,
@@ -37,6 +39,8 @@ class ArtsAntiquesItem {
     this.rating = 0.0,
     this.createdAt,
     this.updatedAt,
+    this.contactPhone,
+    this.contactEmail,
   });
 
   factory ArtsAntiquesItem.fromFirestore(DocumentSnapshot doc) {
@@ -63,6 +67,8 @@ class ArtsAntiquesItem {
       updatedAt: data['updatedAt'] != null 
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,
+      contactPhone: data['contactPhone'],
+      contactEmail: data['contactEmail'],
     );
   }
 
@@ -84,6 +90,8 @@ class ArtsAntiquesItem {
       'rating': rating,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'contactPhone': contactPhone,
+      'contactEmail': contactEmail,
     };
   }
 
@@ -105,6 +113,8 @@ class ArtsAntiquesItem {
     double? rating,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? contactPhone,
+    String? contactEmail,
   }) {
     return ArtsAntiquesItem(
       id: id ?? this.id,
@@ -124,6 +134,8 @@ class ArtsAntiquesItem {
       rating: rating ?? this.rating,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      contactPhone: contactPhone ?? this.contactPhone,
+      contactEmail: contactEmail ?? this.contactEmail,
     );
   }
 }

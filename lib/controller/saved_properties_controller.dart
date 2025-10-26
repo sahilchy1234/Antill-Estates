@@ -3,10 +3,9 @@ import 'package:get/get.dart';
 import 'package:antill_estates/configs/app_string.dart';
 import 'package:antill_estates/gen/assets.gen.dart';
 import 'package:antill_estates/model/property_model.dart';
-import 'package:antill_estates/model/arts_antiques_model.dart';
 import 'package:antill_estates/routes/app_routes.dart';
 import 'package:antill_estates/services/property_service.dart';
-import 'package:antill_estates/services/arts_antiques_data_service.dart';
+import 'package:antill_estates/services/cache_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SavedPropertiesController extends GetxController {
@@ -25,8 +24,11 @@ class SavedPropertiesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadSavedProperties();
-    loadSavedArtsAntiques();
+    // Load cached data instantly if available
+    loadCachedDataSync();
+    // Then load fresh data; only show loading if nothing cached
+    loadSavedProperties(showLoading: !hasCachedData());
+    loadSavedArtsAntiques(showLoading: !hasCachedData());
   }
 
   void updateSavedTab(int index) {
@@ -36,9 +38,11 @@ class SavedPropertiesController extends GetxController {
   // ==================== SAVED PROPERTIES ====================
 
   // Load saved properties from Firebase
-  Future<void> loadSavedProperties() async {
+  Future<void> loadSavedProperties({bool showLoading = true}) async {
     try {
-      isLoadingProperties.value = true;
+      if (showLoading) {
+        isLoadingProperties.value = true;
+      }
       print('🔍 Loading saved properties');
       
       final properties = await PropertyService.getSavedProperties();
@@ -46,6 +50,19 @@ class SavedPropertiesController extends GetxController {
       
       // Initialize liked status for each property
       isSimilarPropertyLiked.value = List<bool>.generate(properties.length, (index) => true);
+      
+      // Cache results for instant next load
+      try {
+        final cacheService = Get.find<CacheService>();
+        await cacheService.saveJsonList(
+          'saved_properties',
+          properties.map((p) => p.toJson()).toList(),
+          duration: const Duration(hours: 6),
+        );
+      } catch (_) {}
+      
+      // Precache images for instant display
+      _precachePropertyImages(properties);
       
       print('✅ Loaded ${properties.length} saved properties');
     } catch (e) {
@@ -111,9 +128,11 @@ class SavedPropertiesController extends GetxController {
   // ==================== SAVED ARTS & ANTIQUES ====================
 
   // Load saved arts & antiques from Firebase
-  Future<void> loadSavedArtsAntiques() async {
+  Future<void> loadSavedArtsAntiques({bool showLoading = true}) async {
     try {
-      isLoadingArtsAntiques.value = true;
+      if (showLoading) {
+        isLoadingArtsAntiques.value = true;
+      }
       print('🔍 Loading saved arts & antiques');
       
       final items = await PropertyService.getSavedArtsAntiques();
@@ -121,6 +140,19 @@ class SavedPropertiesController extends GetxController {
       
       // Initialize liked status for each item
       isArtsAntiquesLiked.value = List<bool>.generate(items.length, (index) => true);
+      
+      // Cache results for instant next load
+      try {
+        final cacheService = Get.find<CacheService>();
+        await cacheService.saveJsonList(
+          'saved_arts_antiques',
+          items.cast<Map<String, dynamic>>(),
+          duration: const Duration(hours: 6),
+        );
+      } catch (_) {}
+      
+      // Precache images for instant display
+      _precacheArtsAntiquesImages(items);
       
       print('✅ Loaded ${items.length} saved arts & antiques');
     } catch (e) {
@@ -183,6 +215,86 @@ class SavedPropertiesController extends GetxController {
       await launchUrl(phoneUri);
     } else {
       throw 'Could not launch $phoneUri';
+    }
+  }
+
+  // ==================== CACHING ====================
+
+  /// Check if we already have cached data to show instantly
+  bool hasCachedData() {
+    return savedProperties.isNotEmpty || savedArtsAntiques.isNotEmpty;
+  }
+
+  /// Load cached saved items instantly if available
+  void loadCachedDataSync() {
+    try {
+      final cacheService = Get.find<CacheService>();
+      // Load properties
+      final cachedProps = cacheService.getJsonList('saved_properties');
+      if (cachedProps != null && cachedProps.isNotEmpty) {
+        final props = cachedProps.map((e) => Property.fromJson(e)).toList();
+        savedProperties.value = props;
+        isSimilarPropertyLiked.value = List<bool>.generate(props.length, (index) => true);
+        print('✅ Loaded ${props.length} saved properties from cache');
+        // Precache images from cached data
+        _precachePropertyImages(props);
+      }
+      // Load arts & antiques
+      final cachedArts = cacheService.getJsonList('saved_arts_antiques');
+      if (cachedArts != null && cachedArts.isNotEmpty) {
+        savedArtsAntiques.value = cachedArts;
+        isArtsAntiquesLiked.value = List<bool>.generate(cachedArts.length, (index) => true);
+        print('✅ Loaded ${cachedArts.length} saved arts & antiques from cache');
+        // Precache images from cached data
+        _precacheArtsAntiquesImages(cachedArts);
+      }
+    } catch (e) {
+      // Cache service not registered or other error — ignore silently
+    }
+  }
+
+  // ==================== IMAGE PRECACHING ====================
+
+  /// Precache property images for instant display
+  void _precachePropertyImages(List<Property> properties) {
+    try {
+      if (Get.context == null) return;
+      
+      for (final property in properties) {
+        if (property.propertyPhotos.isNotEmpty) {
+          // Precache first image of each property
+          final imageUrl = property.propertyPhotos.first;
+          if (imageUrl.isNotEmpty) {
+            precacheImage(NetworkImage(imageUrl), Get.context!).catchError((_) {
+              // Silently fail - image will load on demand
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // Silently fail - images will load on demand
+    }
+  }
+
+  /// Precache arts & antiques images for instant display
+  void _precacheArtsAntiquesImages(List<Map<String, dynamic>> items) {
+    try {
+      if (Get.context == null) return;
+      
+      for (final item in items) {
+        final images = item['images'] as List?;
+        if (images != null && images.isNotEmpty) {
+          // Precache first image of each item
+          final imageUrl = images.first as String;
+          if (imageUrl.isNotEmpty) {
+            precacheImage(NetworkImage(imageUrl), Get.context!).catchError((_) {
+              // Silently fail - image will load on demand
+            });
+          }
+        }
+      }
+    } catch (e) {
+      // Silently fail - images will load on demand
     }
   }
 

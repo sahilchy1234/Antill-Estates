@@ -10,6 +10,7 @@ import 'package:antill_estates/common/shimmer_loading.dart';
 import 'package:antill_estates/configs/app_design.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:antill_estates/utils/price_formatter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ArtsAntiquesDetailsView extends StatelessWidget {
   const ArtsAntiquesDetailsView({super.key});
@@ -911,6 +912,9 @@ class ArtsAntiquesDetailsView extends StatelessWidget {
 
   /// Show contact dialog
   void _showContactDialog(BuildContext context, String artistName) {
+    final item = controller.item.value!;
+    final phone = item.contactPhone;
+    final email = item.contactEmail;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -929,36 +933,49 @@ class ArtsAntiquesDetailsView extends StatelessWidget {
               style: AppStyle.heading5Regular(color: AppColor.descriptionColor),
             ),
             const SizedBox(height: AppSize.appSize20),
-            // In a real app, you would show actual contact information here
             Container(
               padding: const EdgeInsets.all(AppSize.appSize16),
               decoration: BoxDecoration(
-                color: AppColor.secondaryColor,
+                color: AppColor.borderColor,
                 borderRadius: BorderRadius.circular(AppSize.appSize12),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.person, color: AppColor.primaryColor),
-                      const SizedBox(width: AppSize.appSize12),
-                      Text(
-                        artistName,
-                        style: AppStyle.heading5Medium(color: AppColor.textColor),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSize.appSize12),
-                  Row(
-                    children: [
-                      const Icon(Icons.phone, color: AppColor.primaryColor),
-                      const SizedBox(width: AppSize.appSize12),
-                      Text(
-                        'Contact details available',
-                        style: AppStyle.heading5Regular(color: AppColor.descriptionColor),
-                      ),
-                    ],
-                  ),
+                  if (phone != null && phone.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        const Icon(Icons.phone, size: 20, color: AppColor.primaryColor),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            phone,
+                            style: AppStyle.heading5Medium(color: AppColor.textColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (email != null && email.isNotEmpty) ...[
+                    Row(
+                      children: [
+                        const Icon(Icons.email, size: 20, color: AppColor.primaryColor),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            email,
+                            style: AppStyle.heading5Medium(color: AppColor.textColor),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if ((phone == null || phone.isEmpty) && (email == null || email.isEmpty))
+                    Text(
+                      'No contact details provided.',
+                      style: AppStyle.heading5Regular(color: AppColor.descriptionColor),
+                    ),
                 ],
               ),
             ),
@@ -972,27 +989,49 @@ class ArtsAntiquesDetailsView extends StatelessWidget {
               style: AppStyle.heading5Medium(color: AppColor.descriptionColor),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              Get.snackbar(
-                'Contact Info',
-                'Contact functionality coming soon!',
+          if (phone != null && phone.isNotEmpty)
+            ElevatedButton(
+              onPressed: () async {
+                Get.back();
+                final uri = Uri.parse('tel:$phone');
+                try {
+                  await launchUrl(uri);
+                } catch (_) {}
+              },
+              style: ElevatedButton.styleFrom(
                 backgroundColor: AppColor.primaryColor,
-                colorText: AppColor.whiteColor,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColor.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSize.appSize8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSize.appSize8),
+                ),
+              ),
+              child: Text(
+                'Call',
+                style: AppStyle.heading5Medium(color: AppColor.whiteColor),
               ),
             ),
-            child: Text(
-              'Contact',
-              style: AppStyle.heading5Medium(color: AppColor.whiteColor),
+          if (email != null && email.isNotEmpty)
+            ElevatedButton(
+              onPressed: () async {
+                Get.back();
+                final uri = Uri(
+                  scheme: 'mailto',
+                  path: email,
+                );
+                try {
+                  await launchUrl(uri);
+                } catch (_) {}
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSize.appSize8),
+                ),
+              ),
+              child: Text(
+                'Email',
+                style: AppStyle.heading5Medium(color: AppColor.whiteColor),
+              ),
             ),
-          ),
         ],
       ),
     );

@@ -50,6 +50,7 @@ import 'package:antill_estates/views/arts_antiques/arts_antiques_view.dart';
 import 'package:antill_estates/views/arts_antiques/arts_antiques_details_view.dart';
 import 'package:antill_estates/views/arts_antiques/arts_antiques_search_view.dart';
 import 'package:antill_estates/views/arts_antiques/arts_antiques_search_list_view.dart';
+import 'package:antill_estates/views/arts_antiques/artist_details_view.dart';
 import 'package:antill_estates/views/upcoming_projects/upcoming_projects_view.dart';
 import 'package:antill_estates/views/upcoming_projects/upcoming_project_details_view.dart';
 import 'package:antill_estates/views/demo/animation_demo_view.dart';
@@ -107,6 +108,7 @@ class AppRoutes {
   static const String artsAntiquesDetailsView = "/arts_antiques_details_view";
   static const String artsAntiquesSearchView = "/arts_antiques_search_view";
   static const String artsAntiquesSearchListView = "/arts_antiques_search_list_view";
+  static const String artistDetailsView = "/artist_details_view";
   static const String upcomingProjectsView = "/upcoming_projects_view";
   static const String upcomingProjectDetailsView = "/upcoming_project_details_view";
   static const String animationDemoView = "/animation_demo_view";
@@ -427,6 +429,12 @@ class AppRoutes {
       name: artsAntiquesSearchListView,
       page: () => ArtsAntiquesSearchListView(),
       customTransition: _CustomPageTransition(PageTransitions.slideAndFade),
+      transitionDuration: AppAnimations.medium,
+    ),
+    GetPage(
+      name: artistDetailsView,
+      page: () => const ArtistDetailsView(),
+      customTransition: _CustomPageTransition(PageTransitions.sharedAxisX),
       transitionDuration: AppAnimations.medium,
     ),
     GetPage(

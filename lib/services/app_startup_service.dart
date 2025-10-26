@@ -15,6 +15,7 @@ import 'package:antill_estates/services/enhanced_image_service.dart';
 import 'package:antill_estates/services/firebase_notification_service.dart';
 import 'package:antill_estates/services/user_notification_service.dart';
 import 'package:antill_estates/controller/notification_controller.dart';
+import 'package:antill_estates/controller/in_app_notification_controller.dart';
 import 'package:antill_estates/services/UserDataController.dart';
 import 'package:antill_estates/services/app_warmup_service.dart';
 import 'package:antill_estates/services/performance_monitor_service.dart';
@@ -45,6 +46,7 @@ class AppStartupService extends GetxController {
     'Firebase Notification Service',
     'User Notification Service',
     'Notification Controller',
+    'In-App Notification Controller',
   ];
   
   bool get isInitialized => _isInitialized.value;
@@ -251,11 +253,19 @@ class AppStartupService extends GetxController {
       Future.microtask(() async {
         Get.put(NotificationController(), permanent: true);
         
+        // Initialize in-app notification controller
+        final inAppController = Get.put(InAppNotificationController(), permanent: true);
+        
         try {
           await FirebaseNotificationService().initialize();
           final userNotificationService = UserNotificationService();
           await userNotificationService.registerUserForNotifications();
           print('✅ Notification services initialized');
+          
+          // Check for in-app notifications after a short delay to let user settle
+          Future.delayed(const Duration(seconds: 3), () {
+            inAppController.checkForNewNotifications();
+          });
         } catch (e) {
           print('⚠️ Notification services initialization failed: $e');
         }

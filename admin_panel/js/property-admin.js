@@ -589,6 +589,7 @@ async function saveProperty() {
             console.log('Contact avatar uploaded successfully');
         }
         
+        let propertyId = editingPropertyId;
         if (editingPropertyId) {
             // Update existing property
             await db.collection('properties').doc(editingPropertyId).update(propertyData);
@@ -596,8 +597,22 @@ async function saveProperty() {
             editingPropertyId = null;
         } else {
             // Add new property
-            await db.collection('properties').add(propertyData);
+            const docRef = await db.collection('properties').add(propertyData);
+            propertyId = docRef.id;
             showAlert('Property added successfully!', 'success');
+            
+            // Create in-app notification for new property
+            await createInAppNotification({
+                title: `New Property: ${propertyData.propertyType} ${propertyData.propertyLooking}`,
+                subtitle: `${propertyData.noOfBedrooms} BHK in ${propertyData.locality}, ${propertyData.city}. ${propertyData.description.substring(0, 100)}...`,
+                itemType: 'property',
+                itemId: propertyId,
+                imageUrl: propertyData.propertyPhotos[0] || '',
+                images: propertyData.propertyPhotos || [],
+                price: propertyData.expectedPrice,
+                location: `${propertyData.locality}, ${propertyData.city}`,
+                actionText: 'View Property',
+            });
         }
         
         // Reset form and close modal
@@ -1108,6 +1123,48 @@ async function testFirebaseConnection() {
     }
 }
 
+// Create in-app notification
+async function createInAppNotification({
+    title,
+    subtitle,
+    itemType,
+    itemId,
+    imageUrl,
+    images = [],
+    price,
+    location,
+    actionText = 'View Details'
+}) {
+    try {
+        console.log('Creating in-app notification:', title);
+        
+        const notificationData = {
+            title: title,
+            subtitle: subtitle,
+            itemType: itemType,
+            itemId: itemId,
+            imageUrl: imageUrl,
+            images: images,
+            price: price,
+            location: location,
+            actionText: actionText,
+            active: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            data: {
+                itemType: itemType,
+                itemId: itemId
+            }
+        };
+        
+        await db.collection('in_app_notifications').add(notificationData);
+        console.log('✅ In-app notification created successfully');
+        
+    } catch (error) {
+        console.error('❌ Error creating in-app notification:', error);
+        // Don't throw - notification creation should not block main operation
+    }
+}
+
 // Export functions for global access
 window.propertyAdmin = {
     loadProperties,
@@ -1119,5 +1176,6 @@ window.propertyAdmin = {
     viewPropertyDetails,
     togglePropertyStatus,
     deleteProperty,
-    showAlert
+    showAlert,
+    createInAppNotification
 };

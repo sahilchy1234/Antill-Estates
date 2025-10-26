@@ -599,8 +599,8 @@ class ArtsAntiquesView extends StatelessWidget {
                       return RepaintBoundary(
                         child: GestureDetector(
                           onTap: () {
-                            // Navigate to artist details
-                            Get.toNamed(AppRoutes.agentsListView);
+                            final name = artist['name'] ?? 'Artist';
+                            Get.toNamed(AppRoutes.artistDetailsView, arguments: name);
                           },
                           child: Container(
                         width: AppSize.appSize160,
