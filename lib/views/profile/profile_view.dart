@@ -106,18 +106,12 @@ class ProfileView extends StatelessWidget {
             return GestureDetector(
               onTap: () {
                 if(index == AppSize.size0) {
-                  Get.toNamed(AppRoutes.responsesView);
-                } else if(index == AppSize.size1) {
-                  Get.toNamed(AppRoutes.languagesView);
-                } else if(index == AppSize.size2) {
-                  Get.toNamed(AppRoutes.communitySettingsView);
-                } else if(index == AppSize.size3) {
                   Get.toNamed(AppRoutes.feedbackView);
-                } else if(index == AppSize.size4) {
+                } else if(index == AppSize.size1) {
                   findingUsHelpfulBottomSheet(context);
-                } else if(index == AppSize.size5) {
+                } else if(index == AppSize.size2) {
                   logoutBottomSheet(context);
-                } else if(index == AppSize.size6) {
+                } else if(index == AppSize.size3) {
                   deleteAccountBottomSheet(context);
                 }
               },

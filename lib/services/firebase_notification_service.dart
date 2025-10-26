@@ -356,13 +356,16 @@ class FirebaseNotificationService {
       final prefs = await SharedPreferences.getInstance();
       final notificationsJson = prefs.getStringList('notifications') ?? [];
       
+      // Sanitize message data to remove any non-serializable objects
+      final sanitizedData = _sanitizeMessageData(message.data);
+      
       final notification = {
         'id': message.messageId ?? DateTime.now().millisecondsSinceEpoch.toString(),
         'title': message.notification?.title ?? 'New Notification',
         'subtitle': message.notification?.body ?? '',
         'timestamp': _formatTimestamp(DateTime.now()),
         'isRead': false,
-        'data': message.data,
+        'data': sanitizedData,
         'type': message.data['type'] ?? 'general',
         'imageUrl': message.notification?.android?.imageUrl ?? message.notification?.apple?.imageUrl,
       };
@@ -379,6 +382,46 @@ class FirebaseNotificationService {
     } catch (e) {
       debugPrint('Error saving notification: $e');
     }
+  }
+  
+  /// Sanitize message data by converting non-JSON-serializable objects to strings
+  Map<String, dynamic> _sanitizeMessageData(Map<String, dynamic> data) {
+    final sanitized = <String, dynamic>{};
+    
+    data.forEach((key, value) {
+      if (value == null) {
+        sanitized[key] = null;
+      } else if (value is String || value is num || value is bool) {
+        // Primitive types are safe
+        sanitized[key] = value;
+      } else if (value is Map) {
+        // Recursively sanitize nested maps
+        try {
+          sanitized[key] = _sanitizeMessageData(Map<String, dynamic>.from(value));
+        } catch (e) {
+          sanitized[key] = value.toString();
+        }
+      } else if (value is List) {
+        // Sanitize lists
+        sanitized[key] = value.map((item) {
+          if (item == null || item is String || item is num || item is bool) {
+            return item;
+          } else if (item is Map) {
+            try {
+              return _sanitizeMessageData(Map<String, dynamic>.from(item));
+            } catch (e) {
+              return item.toString();
+            }
+          }
+          return item.toString();
+        }).toList();
+      } else {
+        // Convert any other type to string
+        sanitized[key] = value.toString();
+      }
+    });
+    
+    return sanitized;
   }
 
   /// Add notification to the notification list

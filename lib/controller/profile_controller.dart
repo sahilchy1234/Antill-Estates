@@ -10,9 +10,6 @@ class ProfileController extends GetxController {
   }
 
   RxList<String> profileOptionImageList = [
-    Assets.images.profileOption1.path,
-    Assets.images.profileOption2.path,
-    Assets.images.profileOption3.path,
     Assets.images.profileOption4.path,
     Assets.images.profileOption5.path,
     Assets.images.profileOption6.path,
@@ -20,9 +17,6 @@ class ProfileController extends GetxController {
   ].obs;
 
   RxList<String> profileOptionTitleList = [
-    AppString.viewResponses,
-    AppString.languages,
-    AppString.communicationSettings,
     AppString.shareFeedback,
     AppString.areYouFindingUsHelpful,
     AppString.logout,

@@ -246,6 +246,9 @@ class NotificationController extends GetxController {
         // Check if notification already exists
         final exists = notifications.any((n) => n.id == doc.id);
         if (!exists) {
+          // Sanitize data to remove Firestore Timestamp objects
+          final sanitizedData = _sanitizeFirestoreData(data);
+          
           // Add new notification
           final notification = NotificationModel(
             id: doc.id,
@@ -253,7 +256,7 @@ class NotificationController extends GetxController {
             subtitle: data['body'] ?? '',
             timestamp: _formatTimestamp(data['timestamp']?.toDate() ?? DateTime.now()),
             isRead: false,
-            data: data,
+            data: sanitizedData,
             type: data['type'] ?? 'general',
             imageUrl: data['imageUrl'],
           );
@@ -292,6 +295,36 @@ class NotificationController extends GetxController {
     } else {
       return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
     }
+  }
+
+  /// Sanitize Firestore data by converting Timestamp objects to ISO strings
+  Map<String, dynamic> _sanitizeFirestoreData(Map<String, dynamic> data) {
+    final sanitized = <String, dynamic>{};
+    
+    data.forEach((key, value) {
+      if (value is Timestamp) {
+        // Convert Firestore Timestamp to ISO string
+        sanitized[key] = value.toDate().toIso8601String();
+      } else if (value is Map) {
+        // Recursively sanitize nested maps
+        sanitized[key] = _sanitizeFirestoreData(Map<String, dynamic>.from(value));
+      } else if (value is List) {
+        // Sanitize lists
+        sanitized[key] = value.map((item) {
+          if (item is Timestamp) {
+            return item.toDate().toIso8601String();
+          } else if (item is Map) {
+            return _sanitizeFirestoreData(Map<String, dynamic>.from(item));
+          }
+          return item;
+        }).toList();
+      } else {
+        // Keep other values as is
+        sanitized[key] = value;
+      }
+    });
+    
+    return sanitized;
   }
 
   /// Load notifications from Firebase service storage
