@@ -72,10 +72,22 @@ class PopularBuildersView extends StatelessWidget {
         ),
         GestureDetector(
           onTap: () {
-            SharePlus.instance.share(
-              ShareParams(
-                text: AppString.appName,
-              ),
+            final shareText = '''
+🏗️ Explore Top Builders & Developers
+
+Discover premium properties from renowned builders on ${AppString.appName}
+
+⭐ Trusted developers
+🏢 Quality construction
+✨ Premium projects
+📍 Prime locations
+
+Download ${AppString.appName} to explore projects from top builders!
+''';
+
+            Share.share(
+              shareText,
+              subject: 'Popular Builders - ${AppString.appName}',
             );
           },
           child: Image.asset(

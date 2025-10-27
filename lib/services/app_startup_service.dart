@@ -29,6 +29,16 @@ class AppStartupService extends GetxController {
   final RxString _initializationStatus = 'Starting...'.obs;
   final RxDouble _initializationProgress = 0.0.obs;
   
+  @override
+  void onInit() {
+    super.onInit();
+    // Ensure initial state is properly set
+    _isInitialized.value = false;
+    _initializationStatus.value = 'Starting...';
+    _initializationProgress.value = 0.0;
+    update(); // Notify listeners of initial state
+  }
+  
   // Core services that must be loaded immediately
   final List<String> _criticalServices = [
     'Firebase Core',
@@ -64,10 +74,12 @@ class AppStartupService extends GetxController {
     try {
       _initializationStatus.value = 'Initializing core services...';
       _initializationProgress.value = 0.1;
+      update(); // Notify UI
       
       // 1. Initialize Firebase Core (parallel with other critical services)
       await _initializeFirebaseCore();
       _initializationProgress.value = 0.3;
+      update(); // Notify UI
       
       // 2. Initialize storage services in parallel
       await Future.wait([
@@ -75,19 +87,23 @@ class AppStartupService extends GetxController {
         SharedPreferences.getInstance(),
       ]);
       _initializationProgress.value = 0.5;
+      update(); // Notify UI
       
       // 3. Initialize critical Firebase services in parallel
       await _initializeCriticalFirebaseServices();
       _initializationProgress.value = 0.7;
+      update(); // Notify UI
       
       // 4. Register critical services
       _registerCriticalServices();
       _initializationProgress.value = 0.9;
+      update(); // Notify UI
       
       // 5. Mark as initialized
       _initializationStatus.value = 'Core services ready';
       _initializationProgress.value = 1.0;
       _isInitialized.value = true;
+      update(); // Notify UI
       
       // End performance monitoring
       performanceMonitor.endTimer('critical_services_init');
@@ -103,6 +119,7 @@ class AppStartupService extends GetxController {
     } catch (e) {
       print('❌ Critical services initialization failed: $e');
       _initializationStatus.value = 'Initialization failed';
+      update(); // Notify UI
       rethrow;
     }
   }
@@ -111,6 +128,7 @@ class AppStartupService extends GetxController {
   Future<void> _initializeFirebaseCore() async {
     try {
       _initializationStatus.value = 'Initializing Firebase...';
+      update(); // Notify UI
       
       // Initialize Firebase
       await Firebase.initializeApp();
@@ -151,6 +169,7 @@ class AppStartupService extends GetxController {
   Future<void> _initializeCriticalFirebaseServices() async {
     try {
       _initializationStatus.value = 'Initializing Firebase Auth...';
+      update(); // Notify UI
       
       // Initialize Firebase Storage with optimized settings
       final storage = FirebaseStorage.instance;
@@ -169,6 +188,7 @@ class AppStartupService extends GetxController {
   void _registerCriticalServices() {
     try {
       _initializationStatus.value = 'Registering services...';
+      update(); // Notify UI
       
       // Register only critical services
       Get.put(FirebaseAuthService(), permanent: true);

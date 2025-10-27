@@ -78,10 +78,22 @@ class ContactOwnerView extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                SharePlus.instance.share(
-                  ShareParams(
-                    text: AppString.appName,
-                  ),
+                final shareText = '''
+📞 Connect with Property Owners
+
+Get in touch with property owners directly on ${AppString.appName}
+
+✅ Direct contact with owners
+💬 No intermediaries
+🚀 Quick response
+🏡 Genuine listings
+
+Download ${AppString.appName} to contact property owners!
+''';
+
+                Share.share(
+                  shareText,
+                  subject: 'Contact Property Owners - ${AppString.appName}',
                 );
               },
               child: Image.asset(

@@ -5,7 +5,6 @@ import 'package:antill_estates/configs/app_color.dart';
 import 'package:antill_estates/configs/app_size.dart';
 import 'package:antill_estates/configs/app_string.dart';
 import 'package:antill_estates/configs/app_style.dart';
-import 'package:antill_estates/controller/bottom_bar_controller.dart';
 import 'package:antill_estates/controller/property_list_controller.dart';
 import 'package:antill_estates/gen/assets.gen.dart';
 import 'package:antill_estates/model/text_segment_model.dart';
@@ -54,10 +53,22 @@ class PropertyListView extends StatelessWidget {
       actions: [
         GestureDetector(
           onTap: () {
-            SharePlus.instance.share(
-              ShareParams(
-                text: AppString.appName,
-              ),
+            final shareText = '''
+🏘️ Discover Amazing Properties!
+
+Find your dream home with ${AppString.appName}
+
+✨ Browse thousands of properties
+🏡 Residential & Commercial listings  
+💰 Best prices & deals
+📍 Properties across all locations
+
+Download ${AppString.appName} now!
+''';
+
+            Share.share(
+              shareText,
+              subject: 'Find Your Dream Property',
             );
           },
           child: Image.asset(

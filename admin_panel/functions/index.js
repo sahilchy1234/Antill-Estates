@@ -434,7 +434,7 @@ async function sendEmailNotifications(validUsers, notificationData) {
                                     <p>${notificationData.body}</p>
                                 </div>
                                 <div class="footer">
-                                    <p>Luxury Real Estate</p>
+                                    <p>Antill Estates</p>
                                 </div>
                             </div>
                         </body>

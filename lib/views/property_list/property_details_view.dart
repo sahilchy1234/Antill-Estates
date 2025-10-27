@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:antill_estates/common/common_button.dart';
 import 'package:antill_estates/configs/app_color.dart';
 import 'package:antill_estates/configs/app_size.dart';
@@ -144,11 +143,38 @@ class PropertyDetailsView extends StatelessWidget {
             )),
             GestureDetector(
               onTap: () {
-                SharePlus.instance.share(
-                  ShareParams(
-                    text: AppString.appName,
-                  ),
-                );
+                final property = propertyDetailsController.currentProperty.value;
+                if (property != null) {
+                  final propertyType = property.propertyType;
+                  final price = property.expectedPrice;
+                  final location = '${property.city}, ${property.locality}';
+                  final bedrooms = property.noOfBedrooms;
+                  final bathrooms = property.noOfBathrooms;
+                  final area = property.builtUpArea;
+                  final lookingFor = property.propertyLooking;
+                  
+                  final shareText = '''
+🏡 $propertyType for $lookingFor
+
+💰 Price: ₹$price
+📍 Location: $location
+🛏️ Bedrooms: $bedrooms | 🚿 Bathrooms: $bathrooms
+📐 Area: $area sq ft
+
+Explore this amazing property on ${AppString.appName}!
+
+Download ${AppString.appName} to discover more properties.
+''';
+
+                  Share.share(
+                    shareText,
+                    subject: '$propertyType for $lookingFor in $location',
+                  );
+                } else {
+                  Share.share(
+                    'Check out amazing properties on ${AppString.appName}!',
+                  );
+                }
               },
               child: Image.asset(
                 Assets.images.share.path,
@@ -1100,43 +1126,6 @@ class PropertyDetailsView extends StatelessWidget {
             left: AppSize.appSize16,
             right: AppSize.appSize16,
             top: AppSize.appSize26,
-          ),
-          Text(
-            AppString.exploreMap,
-            style: AppStyle.heading4Medium(color: AppColor.textColor),
-          ).paddingOnly(
-            top: AppSize.appSize36,
-            left: AppSize.appSize16,
-            right: AppSize.appSize16,
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppSize.appSize12),
-            child: SizedBox(
-              height: AppSize.appSize200,
-              width: double.infinity,
-              child: GoogleMap(
-                onMapCreated: (ctr) {},
-                mapType: MapType.normal,
-                myLocationEnabled: false,
-                zoomControlsEnabled: false,
-                myLocationButtonEnabled: false,
-                markers: {
-                  const Marker(
-                    markerId: MarkerId(AppString.testing),
-                    visible: true,
-                    position: LatLng(AppSize.latitude, AppSize.longitude),
-                  )
-                },
-                initialCameraPosition: const CameraPosition(
-                  target: LatLng(AppSize.latitude, AppSize.longitude),
-                  zoom: AppSize.appSize15,
-                ),
-              ),
-            ),
-          ).paddingOnly(
-            top: AppSize.appSize16,
-            left: AppSize.appSize16,
-            right: AppSize.appSize16,
           ),
           Obx(() {
             if (propertyDetailsController.isLoadingReviews.value) {

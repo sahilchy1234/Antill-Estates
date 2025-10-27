@@ -293,7 +293,7 @@ class RegisterController extends GetxController {
       await authService.loginUser(userId, formattedPhoneNumber, userData);
 
       // Show success message
-      _showSuccess('Account created successfully! Welcome to Luxury Real Estate!');
+      _showSuccess('Account created successfully! Welcome to Antill Estates!');
 
       // Clear form
       _clearForm();

@@ -1,5 +1,5 @@
 class AppString {
-  static const String appName = "Luxury Real Estate";
+  static const String appName = "Antill Estates";
   static const String appLogoName = "Luxury";
 
   static const String onboardTitle1 = "Discover your unique Dream Home";

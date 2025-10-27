@@ -8,6 +8,9 @@ class GalleryController extends GetxController {
   // Loading state
   RxBool isLoading = false.obs;
   
+  // View mode (grid or list)
+  RxBool isGridView = true.obs;
+  
   // Fallback hardcoded images
   RxList<String> hallImageList = [
     Assets.images.hall1.path,
@@ -28,5 +31,10 @@ class GalleryController extends GetxController {
     }
     // Fallback to hardcoded images if no property photos
     return hallImageList;
+  }
+
+  /// Toggle between grid and list view
+  void toggleView() {
+    isGridView.value = !isGridView.value;
   }
 }

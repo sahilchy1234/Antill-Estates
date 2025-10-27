@@ -48,29 +48,36 @@ void main() async {
     print('❌ Cache initialization error: $e');
   }
 
-  // Initialize optimized startup service
+  // Initialize startup service (but don't await - let it run while splash shows)
+  final startupService = Get.put(AppStartupService(), permanent: true);
+  
+  // Get user ID from SharedPreferences quickly
   try {
-    final startupService = Get.put(AppStartupService(), permanent: true);
-    await startupService.initializeCriticalServices();
-    
-    // Get user ID from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     globalUserId = prefs.getString('userId');
     
     if (globalUserId != null && globalUserId!.isNotEmpty) {
       isOld = true;
-      // Initialize user data in background
-      startupService.initializeUserData(globalUserId!);
     }
-    
-    print('✅ App startup completed successfully');
-    
-  } catch (e, st) {
-    print('❌ App startup error: $e');
-    print(st);
+  } catch (e) {
+    print('❌ SharedPreferences error: $e');
   }
 
   runApp(const MyApp());
+  
+  // Start initialization AFTER a small delay to ensure splash screen renders
+  Future.delayed(const Duration(milliseconds: 100), () {
+    startupService.initializeCriticalServices().then((_) {
+      // Initialize user data in background if needed
+      if (globalUserId != null && globalUserId!.isNotEmpty) {
+        startupService.initializeUserData(globalUserId!);
+      }
+      print('✅ App startup completed successfully');
+    }).catchError((e, st) {
+      print('❌ App startup error: $e');
+      print(st);
+    });
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -106,23 +113,50 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool _hasNavigated = false;
+  final DateTime _startTime = DateTime.now();
+  static const int _minSplashDuration = 2000; // Minimum 2 seconds
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AppStartupService>(
+      init: Get.find<AppStartupService>(),
       builder: (startupService) {
-        // Navigate when critical services are ready
-        if (startupService.isInitialized) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _navigateToAppropriateScreen();
-          });
+        // Navigate when critical services are ready AND minimum time has passed
+        if (startupService.isInitialized && !_hasNavigated) {
+          _navigateAfterMinimumDuration();
         }
 
-        return SplashView();
+        return const SplashView();
       },
     );
+  }
+
+  void _navigateAfterMinimumDuration() async {
+    // Calculate how long splash has been showing
+    final elapsedTime = DateTime.now().difference(_startTime).inMilliseconds;
+    final remainingTime = _minSplashDuration - elapsedTime;
+
+    // Wait for remaining time if needed
+    if (remainingTime > 0) {
+      await Future.delayed(Duration(milliseconds: remainingTime));
+    }
+
+    // Check if still mounted and haven't navigated yet
+    if (mounted && !_hasNavigated) {
+      _hasNavigated = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToAppropriateScreen();
+      });
+    }
   }
 
   void _navigateToAppropriateScreen() {

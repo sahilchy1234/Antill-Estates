@@ -77,10 +77,26 @@ class InterestingReadsDetailsView extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                SharePlus.instance.share(
-                  ShareParams(
-                    text: AppString.appName,
-                  ),
+                // Get article title from arguments or default
+                final args = Get.arguments;
+                final articleTitle = args is Map ? (args['title'] ?? 'Interesting Article') : 'Interesting Article';
+                
+                final shareText = '''
+📰 $articleTitle
+
+Read this insightful article on ${AppString.appName}
+
+📚 Real estate insights
+💡 Market trends
+🏡 Property tips
+📊 Expert analysis
+
+Download ${AppString.appName} for more interesting reads!
+''';
+
+                Share.share(
+                  shareText,
+                  subject: articleTitle,
                 );
               },
               child: Image.asset(

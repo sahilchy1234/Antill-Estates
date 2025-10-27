@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:antill_estates/common/common_status_bar.dart';
 import 'package:antill_estates/configs/app_color.dart';
 import 'package:antill_estates/configs/app_size.dart';
+import 'package:antill_estates/configs/app_string.dart';
 import 'package:antill_estates/configs/app_style.dart';
 import 'package:antill_estates/controller/arts_antiques_details_controller.dart';
 import 'package:antill_estates/common/cached_firebase_image.dart';
@@ -619,12 +621,28 @@ class ArtsAntiquesDetailsView extends StatelessWidget {
             // Share button
             ElevatedButton(
               onPressed: () {
-                // Share functionality can be added here
-                Get.snackbar(
-                  'Share',
-                  'Share functionality coming soon!',
-                  backgroundColor: AppColor.primaryColor,
-                  colorText: AppColor.whiteColor,
+                final itemName = item.title;
+                final artist = item.artist;
+                final price = '₹${item.price.toStringAsFixed(0)}';
+                final category = item.category;
+                final year = item.year != null ? item.year.toString() : 'N/A';
+                
+                final shareText = '''
+🎨 $itemName
+
+👨‍🎨 Artist: $artist
+💰 Price: $price
+🏷️ Category: $category
+📅 Year: $year
+
+Discover this unique ${category.toLowerCase()} on ${AppString.appName}!
+
+Download ${AppString.appName} to explore more arts & antiques.
+''';
+
+                Share.share(
+                  shareText,
+                  subject: 'Check out $itemName by $artist',
                 );
               },
               style: ElevatedButton.styleFrom(

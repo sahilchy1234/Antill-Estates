@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:antill_estates/common/common_status_bar.dart';
 import 'package:antill_estates/configs/app_color.dart';
 import 'package:antill_estates/configs/app_size.dart';
+import 'package:antill_estates/configs/app_string.dart';
 import 'package:antill_estates/configs/app_style.dart';
 import 'package:antill_estates/common/cached_firebase_image.dart';
 import 'package:antill_estates/utils/price_formatter.dart';
@@ -497,12 +499,26 @@ class UpcomingProjectDetailsView extends StatelessWidget {
   }
 
   void _shareProject(Map<String, dynamic> project) {
-    // Implement sharing functionality
-    Get.snackbar(
-      'Share',
-      'Sharing functionality will be implemented',
-      backgroundColor: AppColor.primaryColor,
-      colorText: AppColor.whiteColor,
+    final projectName = project['name'] ?? 'Upcoming Project';
+    final location = project['location'] ?? '';
+    final price = project['startingPrice'] != null 
+        ? 'Starting from ₹${project['startingPrice']}' 
+        : '';
+    final developer = project['developer'] ?? '';
+    
+    final shareText = '''
+🏢 $projectName
+
+📍 Location: $location
+${price.isNotEmpty ? '💰 $price\n' : ''}${developer.isNotEmpty ? '👷 Developer: $developer\n' : ''}
+Check out this amazing upcoming project!
+
+Download ${AppString.appName} to explore more properties.
+''';
+
+    Share.share(
+      shareText,
+      subject: 'Check out $projectName',
     );
   }
 

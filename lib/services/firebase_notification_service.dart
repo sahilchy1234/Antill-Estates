@@ -93,7 +93,7 @@ class FirebaseNotificationService {
     if (Platform.isAndroid) {
       const AndroidNotificationChannel channel = AndroidNotificationChannel(
         'luxury_real_estate_channel',
-        'Luxury Real Estate Notifications',
+        'Antill Estates Notifications',
         description: 'Notifications for property updates and messages',
         importance: Importance.high,
         playSound: true,
@@ -284,7 +284,7 @@ class FirebaseNotificationService {
     AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'luxury_real_estate_channel',
-      'Luxury Real Estate Notifications',
+      'Antill Estates Notifications',
       channelDescription: 'Notifications for property updates and messages',
       importance: Importance.high,
       priority: Priority.high,
