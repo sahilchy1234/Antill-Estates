@@ -306,6 +306,12 @@
                     </a>
                 </div>
                 <div class="nav-item">
+                    <a href="in_app_notifications.html" class="nav-link">
+                        <i class="fas fa-mobile-alt"></i>
+                        In-App Notifications
+                    </a>
+                </div>
+                <div class="nav-item">
                     <a href="projects.html" class="nav-link">
                         <i class="fas fa-building"></i>
                         Upcoming Projects
@@ -324,21 +330,9 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="analytics.html" class="nav-link">
-                        <i class="fas fa-chart-line"></i>
-                        Analytics
-                    </a>
-                </div>
-                <div class="nav-item">
                     <a href="users.html" class="nav-link">
                         <i class="fas fa-users"></i>
                         Users
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="index.html#settings" class="nav-link">
-                        <i class="fas fa-cog"></i>
-                        Settings
                     </a>
                 </div>
             </div>
@@ -394,15 +388,6 @@
                             </div>
                             <h3 id="totalUsers">0</h3>
                             <p>Total Users</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="stats-card">
-                            <div class="icon info">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <h3 id="totalRevenue">₹0</h3>
-                            <p>Total Revenue</p>
                         </div>
                     </div>
                 </div>
@@ -598,9 +583,6 @@
                     document.getElementById('totalProjects').textContent = '0';
                 }
                 
-                // Calculate total revenue (placeholder - you can customize this based on your data)
-                document.getElementById('totalRevenue').textContent = '₹0';
-                
                 console.log('Dashboard stats loaded successfully');
             } catch (error) {
                 console.error('Error loading dashboard stats:', error);
@@ -608,7 +590,6 @@
                 document.getElementById('totalProperties').textContent = '0';
                 document.getElementById('totalProjects').textContent = '0';
                 document.getElementById('totalUsers').textContent = '0';
-                document.getElementById('totalRevenue').textContent = '₹0';
             }
         }
 

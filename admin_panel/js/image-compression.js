@@ -13,11 +13,11 @@
 async function compressImage(file, options = {}) {
     // Default compression options
     const defaultOptions = {
-        maxSizeMB: 1, // Maximum file size in MB
-        maxWidthOrHeight: 1920, // Maximum width or height
+        maxSizeMB: 0.5, // Maximum file size in MB
+        maxWidthOrHeight: 1600, // Maximum width or height
         useWebWorker: true,
         fileType: file.type,
-        initialQuality: 0.8 // Quality from 0 to 1
+        initialQuality: 0.7 // Quality from 0 to 1
     };
     
     const compressionOptions = { ...defaultOptions, ...options };
@@ -77,9 +77,9 @@ async function compressMultipleImages(files, options = {}) {
  */
 async function compressPropertyImages(files) {
     return await compressMultipleImages(files, {
-        maxSizeMB: 1.5, // Larger size for property images
-        maxWidthOrHeight: 1920,
-        initialQuality: 0.85
+        maxSizeMB: 0.5, // Compress property images more
+        maxWidthOrHeight: 1600,
+        initialQuality: 0.75
     });
 }
 
@@ -103,9 +103,9 @@ async function compressAvatarImage(file) {
  */
 async function compressProjectImage(file) {
     return await compressImage(file, {
-        maxSizeMB: 1.2,
-        maxWidthOrHeight: 1920,
-        initialQuality: 0.85
+        maxSizeMB: 0.6,
+        maxWidthOrHeight: 1600,
+        initialQuality: 0.75
     });
 }
 
@@ -116,9 +116,9 @@ async function compressProjectImage(file) {
  */
 async function compressArtsAntiquesImage(file) {
     return await compressImage(file, {
-        maxSizeMB: 2, // Higher quality for artwork
-        maxWidthOrHeight: 2048, // Larger dimensions for detail
-        initialQuality: 0.9 // Higher quality for art
+        maxSizeMB: 0.8, // Compress artwork to reasonable size
+        maxWidthOrHeight: 1600, // Balance between detail and file size
+        initialQuality: 0.75 // Good quality but more compression
     });
 }
 
