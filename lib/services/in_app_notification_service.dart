@@ -29,9 +29,9 @@ class InAppNotificationService {
       final viewedList = prefs.getStringList(_viewedNotificationsKey) ?? [];
       
       if (!viewedList.contains(notificationId)) {
-        viewedList.add(notificationId);
-        await prefs.setStringList(_viewedNotificationsKey, viewedList);
-        debugPrint('✅ Notification $notificationId marked as viewed');
+        // viewedList.add(notificationId);
+        // await prefs.setStringList(_viewedNotificationsKey, viewedList);
+        // debugPrint('✅ Notification $notificationId marked as viewed');
       }
     } catch (e) {
       debugPrint('Error marking notification as viewed: $e');
@@ -78,7 +78,7 @@ class InAppNotificationService {
             data['createdAtDate'] = timestamp.toDate().toIso8601String();
           }
           
-          unviewedNotifications.add(data);
+          // unviewedNotifications.add(data);
         }
       }
       
